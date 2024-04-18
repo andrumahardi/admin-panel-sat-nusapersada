@@ -17,7 +17,10 @@ import { URLS } from "@/constants";
 import { GenericObject } from "@/types";
 import { useUsers } from "./use-users";
 import { TableLoader } from "@/components/loaders";
-import { PaginationSizeOptions, PaginationButtonGroup } from "@/components/pagination";
+import {
+  PaginationSizeOptions,
+  PaginationButtonGroup,
+} from "@/components/pagination";
 import { DynamicTable } from "@/components/table";
 
 const rootUrl = URLS.USERS;
@@ -28,7 +31,6 @@ export function Users() {
     contents,
     selectAll,
     deselectAll,
-    deleteSelected,
     toggleSelectRow,
     handleDelete,
     pageSize,
@@ -39,7 +41,8 @@ export function Users() {
     cancelDelete,
     onDelete,
     search,
-    isDeleting
+    isDeleting,
+    handleBulkDelete,
   } = useUsers();
 
   if (isLoading) {
@@ -65,74 +68,76 @@ export function Users() {
             Add User
           </Button>
         </HStack>
-        {contents.length ? (
-          <VStack p={4} alignItems="flex-start" spacing={4}>
-            <HStack w="full" justifyContent="space-between">
-              <PaginationSizeOptions pageSize={pageSize} onChange={setPageSize} />
-              <HStack spacing={2}>
-                <Button size="xs" colorScheme="blue" onClick={selectAll}>
-                  Select all
-                </Button>
-                <Button
-                  size="xs"
-                  colorScheme="blue"
-                  isDisabled={contents.every((el) => !el.checked)}
-                  onClick={deselectAll}
-                >
-                  Deselect all
-                </Button>
-                <Button size="xs" colorScheme="red" onClick={deleteSelected}>
-                  Delete selected
-                </Button>
+        <VStack p={4} alignItems="flex-start" spacing={4}>
+          <HStack w="full" justifyContent="space-between">
+            <PaginationSizeOptions pageSize={pageSize} onChange={setPageSize} />
+            <HStack spacing={2}>
+              <Button size="xs" colorScheme="blue" onClick={selectAll}>
+                Select all
+              </Button>
+              <Button
+                size="xs"
+                colorScheme="blue"
+                isDisabled={contents.every((el) => !el.checked)}
+                onClick={deselectAll}
+              >
+                Deselect all
+              </Button>
+              <Button size="xs" colorScheme="red" onClick={handleBulkDelete}>
+                Delete selected
+              </Button>
+            </HStack>
+            <HStack justifyContent="space-between">
+              <HStack>
+                <Text>Search: </Text>
+                <Input onChange={search} />
               </HStack>
-              <HStack justifyContent="space-between">
-                <HStack>
-                  <Text>Search: </Text>
-                  <Input onChange={search} />
+            </HStack>
+          </HStack>
+          {contents.length ? (
+            <>
+              <Box w="full">
+                <DynamicTable
+                  data={contents as unknown as GenericObject[]}
+                  headColumns={[
+                    {
+                      key: "name",
+                      name: "Name",
+                    },
+                    {
+                      key: "username",
+                      name: "User Name",
+                    },
+                    {
+                      key: "email",
+                      name: "Email",
+                    },
+                  ]}
+                  toggleSelectRow={toggleSelectRow}
+                  handleDelete={handleDelete}
+                  rootUrl={rootUrl}
+                />
+              </Box>
+              <HStack w="full" justifyContent="space-between">
+                <HStack w="full" justifyContent="space-between">
+                  <Text>
+                    Page {page} of {pagination?.pageCount || 1} from{" "}
+                    {contents.length} entries
+                  </Text>
+                  <PaginationButtonGroup
+                    rootUrl={rootUrl}
+                    currentPage={page}
+                    totalPage={+(pagination?.pageCount || 1)}
+                  />
                 </HStack>
               </HStack>
-            </HStack>
-            <Box w="full">
-              <DynamicTable
-                data={contents as unknown as GenericObject[]}
-                headColumns={[
-                  {
-                    key: "name",
-                    name: "Name",
-                  },
-                  {
-                    key: "username",
-                    name: "User Name",
-                  },
-                  {
-                    key: "email",
-                    name: "Email",
-                  },
-                ]}
-                toggleSelectRow={toggleSelectRow}
-                handleDelete={handleDelete}
-                rootUrl={rootUrl}
-              />
-            </Box>
-            <HStack w="full" justifyContent="space-between">
-              <HStack w="full" justifyContent="space-between">
-                <Text>
-                  Page {page} of {pagination?.pageCount || 1} from{" "}
-                  {contents.length} entries
-                </Text>
-                <PaginationButtonGroup
-                  rootUrl={rootUrl}
-                  currentPage={page}
-                  totalPage={+(pagination?.pageCount || 1)}
-                />
-              </HStack>
-            </HStack>
-          </VStack>
-        ) : (
-          <VStack p={4}>
-            <Text>This table is empty ;(</Text>
-          </VStack>
-        )}
+            </>
+          ) : (
+            <VStack w="full">
+              <Text>This table is empty ;(</Text>
+            </VStack>
+          )}
+        </VStack>
       </Box>
 
       <Modal isOpen={isOpen} onClose={cancelDelete}>

@@ -57,21 +57,3 @@ export function useGetUsers(query: UsersQuery) {
 		}
 	);
 }
-
-export async function deleteUser({ id }: DeleteUserVariables) {
-	const fetch = createClientSideFetch();
-	await fetch.delete(`/users/${id}`);
-	return {
-		message: "success",
-	};
-}
-
-type DeleteUserResponse = Awaited<ReturnType<typeof deleteUser>>;
-
-export function useDeleteUser() {
-	return useMutation<
-		DeleteUserResponse,
-		AxiosError<FetchError>,
-		DeleteUserVariables
-	>(deleteUser);
-}

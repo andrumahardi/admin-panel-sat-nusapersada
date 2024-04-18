@@ -1,82 +1,85 @@
 import { URLS } from "@/constants";
 import { useErrorHandler, usePagination, useTableActions } from "@/hooks";
 import { useDisclosure } from "@chakra-ui/react";
-import { useDeleteUser, useGetUsers } from "./queries";
+import { useGetUsers } from "./queries";
+import { useState } from "react";
 
 const rootUrl = URLS.USERS;
 
+let timeout: NodeJS.Timeout | null = null;
+
 export function useUsers() {
-  
-	const {
-		query: { page, pageSize },
-		setPageSize,
-	} = usePagination({ targetUrl: rootUrl });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const {
+    query: { page, pageSize },
+    setPageSize,
+  } = usePagination({ targetUrl: rootUrl });
 
-	const { isOpen, onOpen, onClose } = useDisclosure();
-	const {
-		data,
-		isLoading,
-		error: getError,
-		refetch,
-	} = useGetUsers({ page, pageSize });
-	const {
-		mutate: deleteFn,
-		isLoading: isDeleting,
-		error: deleteError,
-	} = useDeleteUser();
-	useErrorHandler({ error: getError || deleteError });
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { data, isLoading, error: getError } = useGetUsers({ page, pageSize });
+  useErrorHandler({ error: getError });
 
-	const { pagination } = data?.meta || { pagination: {} };
-	const {
-		contents,
-		selectedId,
-		search,
-		toggleSelectRow,
-		deleteSelected,
-		selectAll,
-		deselectAll,
-		setSelectedId,
-	} = useTableActions({ data: data?.data || [] });
+  const { pagination } = data?.meta || { pagination: {} };
+  const {
+    contents,
+    selectedId,
+    search,
+    toggleSelectRow,
+    selectAll,
+    deselectAll,
+    setSelectedId,
+    setContents,
+  } = useTableActions({ data: data?.data || [] });
 
-	function handleDelete(id: number) {
-		setSelectedId(id);
-		onOpen();
-	}
+  function handleDelete(id: number) {
+    setSelectedId(id);
+    onOpen();
+  }
 
-	function cancelDelete() {
-		setSelectedId(null);
-		onClose();
-	}
+  function cancelDelete() {
+    setSelectedId(null);
+    onClose();
+  }
 
-	function onDelete() {
-		deleteFn(
-			{ id: `${selectedId}` },
-			{
-				onSuccess: () => {
-					refetch();
-					setSelectedId(null);
-					onClose();
-				},
-			}
-		);
-	}
+  function onDelete() {
+    setIsDeleting(true);
+    timeout = setTimeout(() => {
+      if (selectedId) {
+        setContents(contents.filter((el) => el.id !== selectedId));
+				setSelectedId(null);
+      } else {
+        setContents(contents.filter((el) => !el.checked));
+      }
+      timeout && clearTimeout(timeout);
+      setIsDeleting(false);
+      onClose();
+    }, 1e3);
+  }
+
+  function handleBulkDelete() {
+    const haveSelection = contents.some((el) => el.checked);
+
+    if (haveSelection) {
+      onOpen();
+    }
+  }
 
   return {
     isLoading,
     contents,
     selectAll,
     deselectAll,
-    deleteSelected,
     toggleSelectRow,
     handleDelete,
     pageSize,
     setPageSize,
-		search,
+    search,
     page,
     pagination,
     isOpen,
     cancelDelete,
     onDelete,
-    isDeleting
-  }
+    isDeleting,
+    handleBulkDelete,
+  };
 }

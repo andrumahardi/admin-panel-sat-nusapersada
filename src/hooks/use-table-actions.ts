@@ -1,5 +1,5 @@
 import { GenericObject } from "@/types";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 type Props = {
   data: GenericObject[];
@@ -41,11 +41,6 @@ export function useTableActions({ data }: Props) {
     );
   }
 
-  function deleteSelected() {
-    const selectedData = contents.filter((el) => el.checked);
-    if (!selectedData.length) return;
-  }
-
   function search(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.value) {
       setContents(
@@ -64,10 +59,10 @@ export function useTableActions({ data }: Props) {
     contents,
     selectedId,
     search,
+    setContents,
     setSelectedId,
     selectAll,
     deselectAll,
     toggleSelectRow,
-    deleteSelected,
   };
 }

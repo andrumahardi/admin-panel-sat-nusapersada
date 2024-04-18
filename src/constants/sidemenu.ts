@@ -9,21 +9,9 @@ export const sidemenu = [
 		name: "User Management",
 		children: [
 			{
-				name: "Roles",
-				link: URLS.ROLES,
-			},
-			{
 				name: "Users",
 				link: URLS.USERS,
 			},
 		],
-	},
-	{
-		name: "Income",
-		link: URLS.INCOMES,
-	},
-	{
-		name: "Expense",
-		link: URLS.EXPENSES,
 	},
 ];

@@ -2,7 +2,6 @@
 
 import { LOCAL_ASSETS, URLS } from "@/constants";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import Cookies from "js-cookie";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { ImageFill } from "@/components/images";
@@ -18,7 +17,6 @@ export function UpperNav({ onClick }: Props) {
 
 	function handleLogout() {
 		router.push(URLS.LOGIN);
-		Cookies.remove("token", { expires: 7 });
 	}
 
 	return (

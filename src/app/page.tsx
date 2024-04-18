@@ -1,5 +1,9 @@
-export default function Home() {
-  return (
-    <>asdasdas</>
-  )
+import { MainContainer } from "@/components/containers";
+
+export default function Dashboard() {
+	return (
+		<MainContainer>
+			asdsadasdas
+		</MainContainer>
+	);
 }
